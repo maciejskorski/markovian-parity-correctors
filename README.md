@@ -1,1 +1,1 @@
-# markovian-parity-correctors
+# Markovian Parity Correctors
