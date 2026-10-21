@@ -23,10 +23,16 @@ Setting $t=-1$ (we write $\mathbf K^{(i)}=\mathbf K_{-1}^{(i)}$) shows that the 
 $$\mathrm{bias}(S_n)=\mathbb E(-1)^{S_n}=\pi\ \mathbf K^{(1)}\cdots\mathbf K^{(n)}\mathbf 1\;\overset{\text{homog.}}{=}\;\pi\mathbf K^{n}\mathbf 1 .$$
 
 **Binary first-order chain.** Parametrizing with holding probabilities $\delta_1,\delta_2$:
-$$\mathbf P=\begin{pmatrix}\delta_1&1-\delta_1\\1-\delta_2&\delta_2\end{pmatrix},\qquad \mathbf K=\begin{pmatrix}\delta_1&-(1-\delta_1)\\1-\delta_2&-\delta_2\end{pmatrix},$$
-By Cayley–Hamilton $\mathbf K^2=\tau\mathbf K+\lambda\mathbf I$ with $\tau=\delta_1-\delta_2$, $\lambda=\delta_1+\delta_2-1$. 
-Thus, $b_n=\mathrm{bias}(S_n)$ satisfies the Fibbonacci-type recurssion 
+
+```math
+\mathbf P=\begin{pmatrix}\delta_1&1-\delta_1\\1-\delta_2&\delta_2\end{pmatrix},\qquad \mathbf K=\begin{pmatrix}\delta_1&-(1-\delta_1)\\1-\delta_2&-\delta_2\end{pmatrix}.
+```
+
+By Cayley–Hamilton, $\mathbf K^2=\tau\mathbf K+\lambda\mathbf I$ with $\tau=\delta_1-\delta_2$, $\lambda=\delta_1+\delta_2-1$.
+Thus $b_n=\mathrm{bias}(S_n)$ satisfies the Fibonacci-type recursion
+
 $$b_n=\tau b_{n-1}+\lambda b_{n-2},$$
+
 decaying like $\rho(\mathbf K)^n$.
 
 ## Scripts
