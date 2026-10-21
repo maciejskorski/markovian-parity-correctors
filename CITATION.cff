@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the paper below."
+title: "markovian-parity-correctors: supplementary repository"
+type: software
+authors:
+  - family-names: Skorski
+    given-names: Maciej
+    orcid: "https://orcid.org/0000-0003-2997-7539"
+  - family-names: Mittmann
+    given-names: Johannes
+    orcid: "https://orcid.org/0000-0002-9307-1494"
+repository-code: "https://github.com/maciejskorski/markovian-parity-correctors"
+license: MIT
+preferred-citation:
+  type: report
+  title: "Unpredictability from Parity: Understanding Linear Correctors for Markovian Sources"
+  authors:
+    - family-names: Skorski
+      given-names: Maciej
+      orcid: "https://orcid.org/0000-0003-2997-7539"
+    - family-names: Mittmann
+      given-names: Johannes
+      orcid: "https://orcid.org/0000-0002-9307-1494"
+  year: 2026
+  institution:
+    name: "Cryptology ePrint Archive"
+  number: "2026/2417"
+  url: "https://eprint.iacr.org/2026/2417"
