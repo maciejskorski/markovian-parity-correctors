@@ -1,36 +1,39 @@
-"""Exact check that max |bias(S_n)| / beta^2 = 1 (default n=3; n=4 is too slow with sympy.solve) over all binary chains with next-bit bias <= beta.
-Param.: d1=(1+b*u)/2, d2=(1+b*v)/2 with b=beta in [0,1], u,v in [-1,1]. bias(S_n) = (K^n 1)_{x0} is a polynomial,
-divisible by b^2; a polynomial on a box attains its extrema at stationary points of the faces/edges/corners (exact enumeration)."""
-import itertools
+"""Exact proof that max |bias(S_n)| = beta^2 for n=3,4 over binary chains with next-bit bias <= beta.
+Param.: d1=(1+b*u)/2, d2=(1+b*v)/2, b=beta in [0,1], u,v in [-1,1]; bias(S_n)=(K^n 1)_{x0} is divisible by b^2.
+f = bias/b^2 is a polynomial; 1-f >= 0 and 1+f >= 0 on the cube is certified by nonnegative Bernstein
+coefficients (exact rationals, adaptive subdivision); f = +-1 identically in beta along a vertex edge (d1=d2=(1+-beta)/2) shows it is attained."""
+import itertools, sys
+from fractions import Fraction as Fr
+from math import comb
 import sympy as sp
 
-b, u, v = X = sp.symbols("b u v")
-lo_hi = {b: (0, 1), u: (-1, 1), v: (-1, 1)}
-d1, d2 = (1 + b * u) / 2, (1 + b * v) / 2
-K = sp.Matrix([[d1, d1 - 1], [1 - d2, -d2]])               # K = P diag(1,-1)
+S = sp.symbols("s t w")                                   # unit-cube coords: b=s, u=2t-1, v=2w-1
+s_, t_, w_ = S
+b, u, v = s_, 2 * t_ - 1, 2 * w_ - 1
+K = sp.Matrix([[(1 + b*u)/2, (1 + b*u)/2 - 1], [1 - (1 + b*v)/2, -(1 + b*v)/2]])    # K = P diag(1,-1)
 
-def extrema(f):
-    vals = []
-    for pat in itertools.product((0, 1, None), repeat=3):    # each variable fixed at lo / hi / free
-        free = [x for x, p in zip(X, pat) if p is None]
-        sub = {x: lo_hi[x][p] for x, p in zip(X, pat) if p is not None}
-        g = f.subs(sub)
-        sols = sp.solve([sp.diff(g, x) for x in free], free, dict=True) if free else [{}]
-        for s in sols:
-            rest = [x for x in free if x not in s]                    # non-isolated stationary set: f is constant on it,
-            for t in itertools.product((.25, .5, .75), repeat=len(rest)):  # so sample it (its ends lie on lower-dim strata)
-                pt = {**sub, **s, **{x: lo_hi[x][0] + q * (lo_hi[x][1] - lo_hi[x][0]) for x, q in zip(rest, t)}}
-                pt = {x: sp.sympify(pt[x]).subs({r: pt[r] for r in rest}) for x in X}
-                if all(sp.im(sp.N(pt[x])) == 0 and lo_hi[x][0] - 1e-12 <= sp.N(pt[x]) <= lo_hi[x][1] + 1e-12 for x in X):
-                    vals.append(sp.N(f.subs(pt), 30))
-    return min(vals), max(vals)
+def bernstein(P):
+    N = [P.degree(x) for x in S]; a = {m: Fr(int(c.p), int(c.q)) for m, c in P.terms()}
+    return {(i, j, k): sum(a.get((l, m, n), 0) * Fr(comb(i, l) * comb(j, m) * comb(k, n), comb(N[0], l) * comb(N[1], m) * comb(N[2], n))
+                           for l in range(i + 1) for m in range(j + 1) for n in range(k + 1))
+            for i in range(N[0] + 1) for j in range(N[1] + 1) for k in range(N[2] + 1)}, N
 
-import sys
-for n in map(int, sys.argv[1:] or ["3"]):
+def nonneg(P, depth=10):
+    c, N = bernstein(P)
+    if min(c.values()) >= 0: return True
+    if any(c[tuple(N[d] * e[d] for d in range(3))] < 0 for e in itertools.product((0, 1), repeat=3)): return False   # corner value < 0
+    if depth == 0: raise RuntimeError("depth exhausted")
+    for h in itertools.product((0, 1), repeat=3):          # split cube into 8 sub-cubes
+        sub = {x: (x + hh) / 2 for x, hh in zip(S, h)}
+        if not nonneg(sp.Poly(P.as_expr().subs(sub, simultaneous=True), *S), depth - 1): return False
+    return True
+
+for n in map(int, sys.argv[1:] or ["3", "4"]):
     for x0 in (0, 1):
         f = sp.cancel(sp.expand((K**n * sp.ones(2, 1))[x0]) / b**2)
-        assert f.is_polynomial(*X)
-        lo, hi = extrema(f)
-        print(f"n={n} x0={x0}: bias(S_n)/beta^2 has exact range [{sp.N(lo, 12)}, {sp.N(hi, 12)}] on the box")
-        assert max(abs(lo), abs(hi)) <= 1 + sp.Float("1e-25") and max(abs(lo), abs(hi)) >= 1 - sp.Float("1e-25")
-print("=> max |bias(S_n)| = beta^2 attained, for n in", list(map(int, sys.argv[1:] or ["3"])))
+        assert f.is_polynomial(*S)
+        ok = all(nonneg(sp.Poly(sp.expand(1 + sg * f), *S)) for sg in (1, -1))
+        top = [(tt, ww) for tt, ww in itertools.product((0, 1), repeat=2) if sp.expand(f.subs({t_: tt, w_: ww})) in (1, -1)]
+        print(f"n={n} x0={x0}: |bias(S_n)| <= beta^2 certified: {ok}; equality for all beta at (t,w) = {top[:2]}")
+        assert ok and top
+print("=> max |bias(S_n)| = beta^2 for n in", sys.argv[1:] or [3, 4])

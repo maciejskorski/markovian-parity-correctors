@@ -23,7 +23,7 @@ for ax, (name, (d1, d2)) in zip(axes, configs.items()):
         par ^= x; mc.append(1 - 2 * par.mean())
     ax.plot(exact, "-", c="#b2182b", label="kernel $(K^n\mathbf{1})_{x_0}$")
     ax.plot(mc, "o", c="#2166ac", ms=4, label=f"Monte Carlo ($N=10^6$)")
-    ax.axhline(0, c="gray", lw=.5); ax.set_title(name, fontsize=10); ax.set_xlabel("$n$")
+    ax.spines[["top", "right"]].set_visible(False); ax.axhline(0, c="gray", lw=.5); ax.set_title(name, fontsize=10); ax.set_xlabel("$n$")
     print(f"{name}: max |kernel - MC| = {np.max(np.abs(np.array(mc) - exact)):.1e}  (MC noise ~ {1/np.sqrt(N):.1e})")
 axes[0].set_ylabel("bias$(S_n)$"); axes[0].legend(frameon=False)
 fig.tight_layout(); fig.savefig("figures/xor_trajectories.png", dpi=150)

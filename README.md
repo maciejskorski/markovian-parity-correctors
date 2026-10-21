@@ -1,10 +1,13 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3](https://img.shields.io/badge/python-3-blue.svg)](scripts/)
+[![IACR ePrint 2026/2417](https://img.shields.io/badge/IACR%20ePrint-2026%2F2417-b31b1b.svg)](https://eprint.iacr.org/2026/2417)
 # Markovian Parity Correctors
 
 Supplementary material for *Unpredictability from Parity: Understanding Linear Correctors for Markovian Sources* ([IACR ePrint 2026/2417](https://eprint.iacr.org/2026/2417)).
 
 ## Parity for Correcting Bit Balance
 
-The parity operation (XOR) is well-suited to decrease the bias of input bits, as studied in the theory of Boolean functions and commonly adopted in hardware random number generators (Dichtl, Lacharme).
+The parity operation (XOR) is well-suited to decrease the bias of input bits, as studied in the theory of Boolean functions and commonly adopted in hardware random number generators (Dichtl, FSE'07; Lacharme, FSE'08 and IEEE TIT'09).
 
 The bias decays geometrically under independent inputs. We extend this to Markov chains, a more realistic randomness model.
 
@@ -33,18 +36,16 @@ Thus $b_n=\mathrm{bias}(S_n)$ satisfies the Fibonacci-type recursion
 
 $$b_n=\tau b_{n-1}+\lambda b_{n-2},$$
 
-decaying like $\rho(\mathbf K)^n$.
+with two edge cases:
+- **unbiased but correlated**: $b_n=\lambda^{\lceil n/2\rceil}$ with start at $X_0=0$, the rate is only $\sqrt{\lvert\lambda\rvert}$ per bit ($\lambda=2\delta_1-1$ is the correlation of consecutive bits);
+- **independent but biased**: $b_n=\tau^n$, the Piling-up Lemma.
 
-## Scripts
 
-Requires `numpy`, `matplotlib` and `sympy`.
+## Experiments
 
-| script | what it shows |
-|---|---|
-| `scripts/prove_rate.py` | $n=3$: sharp rate $\max\lvert\mathrm{bias}(S_3)\rvert=\beta^2$, by exact polynomial optimization |
-| `scripts/xor_trajectories.py` | $n\mapsto\mathrm{bias}(S_n)$: kernel formula vs Monte Carlo ($10^6$ chains) and the Cayley–Hamilton recursion; writes `figures/xor_trajectories.png` |
+Let $\beta$ bound the bias of each next bit: $\Pr(X_{i+1}=1\mid\text{past})\in[\frac{1-\beta}{2},\frac{1+\beta}{2}]$. The parity bias decays at most like $\rho(\mathbf K)^{n+o(1)}$, so $\rho(\mathbf K)$ is the per-bit rate.
 
-![XOR bias trajectories](figures/xor_trajectories.png)
+For order $m=2,3$, the worst-case rate is $\max\rho(\mathbf K)=C\,\beta^{1/(m+1)}$ with $C>1$ (numerically $C\approx1.05$ for $m=2$ and $C\approx1.04$ for $m=3$; see `scripts/rate_m123.py`).
 
 ## Citation
 
